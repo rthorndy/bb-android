@@ -31,9 +31,29 @@ class BanjoBudget(toga.App):
         except Exception as e:
             account_names = [f"Error loading accounts: {e}"]
 
-        # Create a List widget to display account names
-        list_widget = DetailedList(data=[{"title" : account_name} for account_name in account_names], style=Pack(flex=1))
-        main_box = toga.Box(children=[list_widget], style=Pack(direction=COLUMN, margin=10))
+
+        # Simulate dividers by alternating row background colors
+        detailed_data = []
+        for idx, account_name in enumerate(account_names):
+            # Alternate background color for divider effect
+            bg_color = "#f8f8f8" if idx % 2 == 0 else "#e0e0e0"
+            detailed_data.append({"title": account_name, "style": Pack(background_color=bg_color)})
+
+        # Create a DetailedList with border and drop shadow on the container
+        list_container = toga.Box(
+            children=[
+                DetailedList(
+                    data=[{"title": account_name} for account_name in account_names],
+                    style=Pack(flex=1)
+                )
+            ],
+            style=Pack(
+                flex=1,
+                padding=8,
+                background_color="#ffffff"
+            )
+        )
+        main_box = toga.Box(children=[list_container], style=Pack(direction=COLUMN, margin=20, flex=1))
 
         self.main_window = toga.MainWindow(title=self.formal_name)
         self.main_window.content = main_box
