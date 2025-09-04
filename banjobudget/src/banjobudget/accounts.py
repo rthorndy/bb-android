@@ -25,9 +25,9 @@ def create_accounts_box(app):
     accounts = db.get_accounts()
     accounts_list = Row(children = [ create_account_box(app, acct) for acct in accounts ])
     scroller = ScrollContainer(horizontal = True, vertical = False, content=accounts_list)
-    return Box(children=[header, scroller], style=Pack(direction="column", flex=1))
+    return Box(children=[header, scroller], style=Pack(direction="column", height=75))
 
 def create_account_box(app, acct:Account):
-    data_box = Column(children = [ Label(text=acct.name), Label(text=acct.balance) ])
+    data_box = Column(children = [ Label(text=acct.name, style=Pack(font_size=8)), Label(text=acct.balance, style=Pack(font_size=8)) ])
     image = Image(app.paths.app / f'resources/icons/icon__{acct.color}_{acct.name[0]}.png')
-    return Row(children=[ImageView(image), data_box], style=Pack(width=200, height=50, margin=9))
+    return Row(children=[ImageView(image), data_box], style=Pack(width=200, height=64, margin=9))
