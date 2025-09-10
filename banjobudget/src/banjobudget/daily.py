@@ -71,4 +71,4 @@ def create_daily_box():
     accounts.add(balances)
     accounts.add(spendables)
 
-    return Column(children=[header, content])
+    return Column(children=[header, content], style=Pack(flex=1, background_color = "white", gap=20))

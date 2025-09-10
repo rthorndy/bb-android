@@ -38,6 +38,8 @@ class DayCanvas(toga.Canvas):
         has_expense: bool,
         cash: str,
         spendable: str,
+        is_today: bool,
+        is_month: bool,
         style: Optional[Pack] = None,
     ) -> None:
         self.day: str = day
@@ -45,6 +47,9 @@ class DayCanvas(toga.Canvas):
         self.has_expense: bool = has_expense
         self.cash: str = cash
         self.spendable: str = spendable
+        self.is_today: bool = is_today
+        self.is_month: bool = is_month
+
 
         # Reasonable default footprint for a calendar cell
         default_style = Pack(width=75, height=60)
@@ -55,8 +60,6 @@ class DayCanvas(toga.Canvas):
         self.on_press = self._on_press
         self.on_alt_press = self._on_press
 
-        # Draw the canvas
-        self.draw()
 
     # ---- Event handlers ----
     def _on_press(self, _widget: toga.Canvas) -> None:  # Stub for now
@@ -87,35 +90,33 @@ class DayCanvas(toga.Canvas):
             width = len(text) * fallback_char_w
         return width
 
-    def draw(self) -> None:
+    def draw(self, width) -> None:
         # Determine available drawing area
         context = self.context
+        context.clear()
         font = toga.Font(family=SANS_SERIF, size=8)
+        w = width
+        # h = min(100, max(w, 60))
+        h = 60
 
-        w = getattr(self.style, "width", None) or 75
-        h = getattr(self.style, "height", None) or 60
-
-        try:
-            w = int(w)
-        except (TypeError, ValueError):
-            w = 75
-        try:
-            h = int(h)
-        except (TypeError, ValueError):
-            h = 60
+        # print(f'{self.day} drawn to: {w}x{h}, window is {self.window.size if self.window else None}')
 
         pad = 6
         row_h = h / 4.0
 
         # Baselines/centers for each row
-        y1 = row_h * 0 + row_h * 0.65
+        y1 = row_h * 0 + row_h * 0.65 + 2
         y2 = row_h * 1 + row_h * 0.5
         y3 = row_h * 2 + row_h * 0.65
         y4 = row_h * 3 + row_h * 0.65
 
         # Background
         context.rect(0, 0, w, h)
-        context.fill("#FFFFFF")
+        context.fill("lightyellow" if self.is_today else ("white" if self.is_month else "lightgray"))
+
+        # Border
+        with context.Stroke(0, 0, color = "black") as stroke:
+            stroke.rect(0, 0, w-1, h-1)
 
         # Row 1: Day (right aligned)
         day_text = str(self.day)
