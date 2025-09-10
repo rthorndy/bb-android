@@ -1,6 +1,9 @@
 """
 A budget tool for the rest of us
 """
+import sys
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import toga
 from toga.style import Pack
 from toga.style.pack import COLUMN
@@ -12,6 +15,7 @@ from . import db
 from . import calendar
 from . import daily
 
+TZ_DT = ZoneInfo("America/Vancouver")
 
 class BanjoBudget(toga.App):
     def startup(self):
@@ -20,7 +24,7 @@ class BanjoBudget(toga.App):
         """
         db.set_path(self.paths.app / 'resources/db/banjo-budget.db')
 
-        cal_daily = Column(children=[calendar.create_calendar_box(), daily.create_daily_box()])
+        cal_daily = Column(children=[calendar.create_calendar_box(datetime.now(tz=TZ_DT)), daily.create_daily_box()])
         scroller = ScrollContainer(horizontal=False, vertical=True, content=cal_daily)
         
         accounts_box = accounts.create_accounts_box(self)
@@ -41,5 +45,5 @@ class BanjoBudget(toga.App):
 
 
 def main():
-    toga.Widget.DEBUG_LAYOUT_ENABLED = True
+    toga.Widget.DEBUG_LAYOUT_ENABLED = '--test' in sys.argv
     return BanjoBudget()
