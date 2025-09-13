@@ -72,9 +72,11 @@ class BanjoBudget(toga.App):
 
 
         self.daily_box = daily.create_daily_box()
+        self.calendar_box = calendar.create_calendar_box(self, datetime.now(tz=TZ_DT))
+
         cal_daily = Column(
             children=[
-                calendar.create_calendar_box(datetime.now(tz=TZ_DT)),
+                self.calendar_box,
                 self.daily_box,
             ]
         )
@@ -91,6 +93,7 @@ class BanjoBudget(toga.App):
 
         # self.main_window = toga.MainWindow(title=self.formal_name)
         # self.main_window.content = main_box
+        calendar.select_day(calendar._state['today_canvas'], datetime.now(tz=TZ_DT))
         self.main_window.show()
 
     async def _load_future_chunks(self, widget, steps: int = 11):

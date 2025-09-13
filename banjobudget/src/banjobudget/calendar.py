@@ -23,10 +23,13 @@ _state = {
     'month_label': None,
     'day_boxes_cache': {},
     'calendar_box': None,
+    'app' : None,
+    'today_canvas' : None
 }
 
 
-def create_calendar_box(dt):
+def create_calendar_box(app, dt):
+    _state['app'] = app
     _state['current_month'] = dt.replace(day=1)
     header = create_header()
     day_boxes =  create_day_boxes(dt)
@@ -50,20 +53,38 @@ def create_day_box(dt):
     is_month = (dt.month == _state['current_month'].month)
 
     # Use the custom DayCanvas to render the four-row day cell
+    key = f'{dt.year}-{dt.month:02d}-{dt.day:02d}'
+    data = _state['app'].data[key] if key in _state['app'].data else None
+    has_income=any(t.amount > 0 for t in data['transactions']) if data else False
+    has_expense=any(t.amount < 0 for t in data['transactions']) if data else False
+    cash=f'${sum(data["balances"].values()):0.2f}' if data else ''
+    if data:
+        spend_sum = 0.0
+        neg = 0.0
+        for acct in data['balances']:
+            spend_sum += data['balances'][acct]
+            if data['balances'][acct] < 0:
+                neg = min(neg, data['balances'][acct])
+        spend = f'${neg:0.2f}' if neg < 0.00 else f'${spend_sum:0.2f}'
+    else:
+        spend = ''
+
     canvas = DayCanvas(
         day=str(dt.day),
-        has_income=random.random() < 0.5,
-        has_expense=random.random() < 0.5,
-        cash="$cash",
-        spendable="$spend",
+        has_income=has_income,
+        has_expense=has_expense,
+        cash=cash,
+        spendable=spend,
         is_today = is_today,
         is_month = is_month,
-        month = dt.month, 
+        month = dt.month,
         year = dt.year
     )
     canvas.on_press = select_day
     canvas.style = Pack(flex=1)
     canvas.on_resize = on_resize
+    if is_today:
+        _state['today_canvas'] = canvas
     return canvas
 
 def on_resize(widget, width, height, **kwargs):

@@ -55,8 +55,8 @@ def create_daily_box():
     content.add(transactions)
     content.add(accounts)
 
-    _boxes["expenses"] = Column(children=[Label(text = "Expenses", style=Pack(text_align="right"))])
-    _boxes["income"] = Column(children=[Label(text = "Income", style=Pack(text_align="right"))])
+    _boxes["expenses"] = Column(style=Pack(flex=1), children=[Label(text = "Expenses", style=Pack(text_align="left"))])
+    _boxes["income"] = Column(style=Pack(flex=1),children=[Label(text = "Income", style=Pack(text_align="left"))])
 
 
     transactions.add(_boxes["expenses"])
@@ -81,10 +81,10 @@ def update_daily_box(dt:str, data:dict):
     # Set the expense and income lists.
     _boxes["expenses"].clear()
     _boxes["income"].clear()
-    _boxes["expenses"].add(Label(text = "Expenses", style=Pack(text_align="right")))
-    _boxes["income"].add(Label(text = "Income", style=Pack(text_align="right")))
+    _boxes["expenses"].add(Label(text = "Expenses", style=Pack(flex=1, text_align="left")))
+    _boxes["income"].add(Label(text = "Income", style=Pack(flex=1, text_align="left")))
     for t in data['transactions']:
-        label = Label(text = t.description, style=Pack(text_align="left"))
+        label = Label(text = f'${t.amount:0.2f} - {t.description}', style=Pack(text_align="left"))
         if t.amount < 0.00:
             _boxes["expenses"].add(label)
         else:
@@ -92,6 +92,7 @@ def update_daily_box(dt:str, data:dict):
 
     # Fill in the account summary section
     _boxes["names"].clear()
+    _boxes["names"].add(Label(text = "", style=Pack(text_align="left")))
     _boxes["balances"].clear()
     _boxes["spendables"].clear()
     _boxes["balances"].add(Label(text = "Balance", style=Pack(text_align="right")))
@@ -100,8 +101,8 @@ def update_daily_box(dt:str, data:dict):
         _boxes["names"].add(Label(text = name, style=Pack(text_align="left")))
 
     for balance in data['balances'].values():
-        _boxes["balances"].add(Label(text = balance, style=Pack(text_align="right")))
+        _boxes["balances"].add(Label(text = f'${balance:0.2f}', style=Pack(text_align="right")))
 
     for spendable in data['spendable'].values():
-        _boxes["spendables"].add(Label(text = spendable, style=Pack(text_align="right")))
+        _boxes["spendables"].add(Label(text = f'${spendable:0.2f}', style=Pack(text_align="right")))
 
