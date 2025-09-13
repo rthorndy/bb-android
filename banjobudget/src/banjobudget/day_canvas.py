@@ -40,6 +40,8 @@ class DayCanvas(toga.Canvas):
         spendable: str,
         is_today: bool,
         is_month: bool,
+        month: int,
+        year: int,
         style: Optional[Pack] = None,
     ) -> None:
         self.day: str = day
@@ -49,6 +51,8 @@ class DayCanvas(toga.Canvas):
         self.spendable: str = spendable
         self.is_today: bool = is_today
         self.is_month: bool = is_month
+        self.month = month
+        self.year = year
 
 
         # Reasonable default footprint for a calendar cell

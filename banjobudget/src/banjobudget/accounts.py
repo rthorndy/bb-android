@@ -22,7 +22,7 @@ from .bb_dataclasses import Account
 
 def create_accounts_box(app):
     header = Box(children=[Label('Accounts')])
-    accounts = db.get_accounts()
+    accounts = app.data['accounts']
     accounts_list = Row(children = [ create_account_box(app, acct) for acct in accounts ])
     scroller = ScrollContainer(horizontal = True, vertical = False, content=accounts_list)
     return Box(children=[header, scroller], style=Pack(direction="column", height=75))

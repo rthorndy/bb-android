@@ -37,38 +37,71 @@ data = {
     },
 }
 
+_boxes = {
+    "header_label" : None,
+    "expenses" : None,
+    "income" : None,
+    "names" : None,
+    "balances" : None,
+    "spendables" : None
+}
+
 def create_daily_box():
-    header = Column(children=[Label(text = data["date"].isoformat(), style=Pack(text_align="center"))], style=Pack(justify_content="end", background_color="lightblue", color="black", font_size=20))
+    _boxes["header_label"] = Label(text="Today", style=Pack(text_align="center"))
+    header = Column(children=[_boxes["header_label"]], style=Pack(justify_content="end", background_color="lightblue", color="black", font_size=20))
     content = Column(style=Pack(gap = 20))
     transactions = Row(style=Pack(gap=20))
     accounts = Row(style=Pack(gap=20))
     content.add(transactions)
     content.add(accounts)
 
-    expenses = Column(children=[Label(text = "Expenses", style=Pack(text_align="right"))])
-    income = Column(children=[Label(text = "Income", style=Pack(text_align="right"))])
+    _boxes["expenses"] = Column(children=[Label(text = "Expenses", style=Pack(text_align="right"))])
+    _boxes["income"] = Column(children=[Label(text = "Income", style=Pack(text_align="right"))])
 
-    new_balances = dict(data["balances"])
 
-    for t in data["transactions"]:
-        if t["amount"] < 0:
-            expenses.add(Label(text = f'{t["description"]} ${-t["amount"]}'))
-        else:
-            income.add(Label(text = f'{t["description"]} ${t["amount"]}'))
-        new_balances[t["account"]] += t["amount"]
+    transactions.add(_boxes["expenses"])
+    transactions.add(_boxes["income"])
 
-    transactions.add(expenses)
-    transactions.add(income)
+    _boxes["names"] = Column(children = [Label(text = "", style=Pack(text_align="left"))] + [Label(text = name, style=Pack(text_align="left")) for name in data["balances"].keys()])
+    accounts.add(_boxes["names"])
 
-    names = Column(children = [Label(text = "", style=Pack(text_align="left"))] + [Label(text = name, style=Pack(text_align="left")) for name in data["balances"].keys()])
-    accounts.add(names)
-
-    balances = Column(children = [Label(text = "Balance", style=Pack(text_align="right"))])
-    spendables = Column(children = [Label(text = "Spendable", style=Pack(text_align="right"))])
-    for acct, balance in new_balances.items():
-        balances.add(Label(text = f'${balance}'))
-        spendables.add(Label(text = f'${data["spendable"][acct]}'))
-    accounts.add(balances)
-    accounts.add(spendables)
+    _boxes["balances"] = Column(children = [Label(text = "Balance", style=Pack(text_align="right"))])
+    _boxes["spendables"] = Column(children = [Label(text = "Spendable", style=Pack(text_align="right"))])
+    accounts.add(_boxes["balances"])
+    accounts.add(_boxes["spendables"])
 
     return Column(children=[header, content], style=Pack(flex=1, background_color = "white", gap=20))
+
+def update_daily_box(dt:str, data:dict):
+
+    # Set the header with the date
+    _boxes["header_label"].text = dt.strftime("%B %d, %Y")
+
+
+    # Set the expense and income lists.
+    _boxes["expenses"].clear()
+    _boxes["income"].clear()
+    _boxes["expenses"].add(Label(text = "Expenses", style=Pack(text_align="right")))
+    _boxes["income"].add(Label(text = "Income", style=Pack(text_align="right")))
+    for t in data['transactions']:
+        label = Label(text = t.description, style=Pack(text_align="left"))
+        if t.amount < 0.00:
+            _boxes["expenses"].add(label)
+        else:
+            _boxes["income"].add(label)
+
+    # Fill in the account summary section
+    _boxes["names"].clear()
+    _boxes["balances"].clear()
+    _boxes["spendables"].clear()
+    _boxes["balances"].add(Label(text = "Balance", style=Pack(text_align="right")))
+    _boxes["spendables"].add(Label(text = "Spendable", style=Pack(text_align="right")))
+    for name in data['balances'].keys():
+        _boxes["names"].add(Label(text = name, style=Pack(text_align="left")))
+
+    for balance in data['balances'].values():
+        _boxes["balances"].add(Label(text = balance, style=Pack(text_align="right")))
+
+    for spendable in data['spendable'].values():
+        _boxes["spendables"].add(Label(text = spendable, style=Pack(text_align="right")))
+

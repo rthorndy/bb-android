@@ -11,6 +11,9 @@ from toga.widgets.box import Column, Row
 from toga.widgets.button import Button
 from toga.widgets.label import Label
 from banjobudget.day_canvas import DayCanvas
+from .db import date_key
+from .daily import update_daily_box
+
 
 TZ_PT = ZoneInfo('America/Vancouver')
 
@@ -54,7 +57,9 @@ def create_day_box(dt):
         cash="$cash",
         spendable="$spend",
         is_today = is_today,
-        is_month = is_month
+        is_month = is_month,
+        month = dt.month, 
+        year = dt.year
     )
     canvas.on_press = select_day
     canvas.style = Pack(flex=1)
@@ -67,6 +72,10 @@ def on_resize(widget, width, height, **kwargs):
 
 def select_day(widget:DayCanvas, *args, **kwargs):
     print(f'Clicked: {widget}, {args}, {kwargs}, {widget.day}')
+    data = widget.app.data
+    dt = datetime(widget.year, widget.month, int(widget.day))
+    key = date_key(dt)
+    update_daily_box(dt, data[key])
     return widget
 
 def create_day_row(dt):
