@@ -8,10 +8,12 @@ from typing import Any, Optional
 import json
 
 import toga
+from toga.dialogs import InfoDialog
 from toga.style import Pack
 from toga.style.pack import COLUMN
 from toga.widgets.scrollcontainer import ScrollContainer
 from toga.widgets.box import Box, Column
+from toga.widgets.label import Label
 from toga.window import Window
 from dateutil.relativedelta import relativedelta
 
@@ -19,6 +21,7 @@ from . import accounts
 from . import db
 from . import calendar
 from . import daily
+from .dialogs import AddTransactionDialog
 from .bb_dataclasses import DateTimeEncoder
 
 TZ_DT = ZoneInfo("America/Vancouver")
@@ -101,8 +104,15 @@ class BanjoBudget(toga.App):
         Sets the size of the scroll contaner once the window size is established.
         Then loads and processes 2 years of database transaction data, if needed. 
         """
-        _, window_height = self.main_window.size
-        self.scroller.height = window_height - self.accounts_box.style.height
+        app_width, app_height = self.main_window.size
+        dialog = AddTransactionDialog()
+        # dialog.show()
+        # result = await dialog
+        result = await self.main_window.dialog(dialog)
+        print(f"Dialog result is {result}")
+
+
+        self.scroller.height = app_height - self.accounts_box.style.height
 
         if not self.load_future_chunks:
             return
