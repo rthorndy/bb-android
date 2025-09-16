@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Banjo Budget (Local)",
+            "database": "/home/rthorndy/tmp/banjo-budget.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}

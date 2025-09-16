@@ -22,7 +22,8 @@ from . import db
 from . import calendar
 from . import daily
 from .dialogs import AddTransactionDialog
-from .bb_dataclasses import DateTimeEncoder
+from .bb_dataclasses import DateTimeEncoder, Account
+
 
 TZ_DT = ZoneInfo("America/Vancouver")
 
@@ -55,24 +56,19 @@ class BanjoBudget(toga.App):
                 print(f'Copied {source_path} to {db_path}')
 
                 db.set_path(db_path)
-                self.data = {
-                    "daily" : {},
-                    "accounts": { 'Cash Account' : 0.00 },
-                    "loaded_up_to": (datetime.now(tz=TZ_DT) + relativedelta(months=3)).strftime("%Y-%m-%d")
-                }
             else:
                 print(f'Using existing DATABASE {db_path}')
                 db.set_path(db_path)
-                self.data['accounts'] = db.get_accounts()
-                self.data['loaded_up_to'] = None
-                db.load_data(self.data)  # blocking data computation
-                self.load_future_chunks = True
+
+            self.data['accounts'] = db.get_accounts()
+            self.data['loaded_up_to'] = None
+            db.load_data(self.data)  # blocking data computation
+            self.load_future_chunks = True
         else:
             print(f'Using existing JSON {json_path}')
             db.set_path(json_path)
             with open(json_path, "r", encoding="utf-8") as f:
                 self.data = json.load(f)
-
 
         self.daily_box = daily.create_daily_box()
         self.calendar_box = calendar.create_calendar_box(self, datetime.now(tz=TZ_DT))
@@ -105,11 +101,11 @@ class BanjoBudget(toga.App):
         Then loads and processes 2 years of database transaction data, if needed. 
         """
         app_width, app_height = self.main_window.size
-        dialog = AddTransactionDialog()
+        # dialog = AddTransactionDialog()
         # dialog.show()
         # result = await dialog
-        result = await self.main_window.dialog(dialog)
-        print(f"Dialog result is {result}")
+        # result = await self.main_window.dialog(dialog)
+        # print(f"Dialog result is {result}")
 
 
         self.scroller.height = app_height - self.accounts_box.style.height
@@ -118,7 +114,10 @@ class BanjoBudget(toga.App):
             return
 
         for _ in range(steps):
+            print(f"Loading data from {widget.data['loaded_up_to']}")
             await db.async_load_data(widget.data)
+
+        print(f"November 26: {widget.data['2025-11-26']}")
 
         return widget
 

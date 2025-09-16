@@ -40,8 +40,8 @@ def get_accounts() -> list[Account]:
 
 def get_transactions(start_date:datetime, end_date:datetime) -> list[Transaction]:
 
-    start_date = datetime(start_date.year, start_date.month, start_date.day, tzinfo=TZ_PT)
-    end_date = datetime(end_date.year, end_date.month, end_date.day, tzinfo=TZ_PT)
+    start_date = datetime(start_date.year, start_date.month, start_date.day)
+    end_date = datetime(end_date.year, end_date.month, end_date.day)
 
     conn = _conn()
     cursor = conn.cursor()
@@ -54,25 +54,28 @@ def get_transactions(start_date:datetime, end_date:datetime) -> list[Transaction
     # Step 2: get all recurring transactions within the date range. 
     # Create instances with fixed date for any that have occurrences within the
     # date range.
-    cursor.execute("SELECT description, amount, date, is_recurring, recurrence_rule, account.name as account_name, end_date FROM `transaction` join account on `transaction`.account_id=account.id where date >= ? and date <= ? and is_recurring = 1", (start_date.strftime("%Y-%m-%d"), end_date.strftime("%Y-%m-%d")))
+    cursor.execute("SELECT description, amount, date, is_recurring, recurrence_rule, account.name as account_name, end_date FROM `transaction` join account on `transaction`.account_id=account.id where is_recurring = 1")
     data = cursor.fetchall()
     for row in data:
         t = Transaction(*row)
+        t.date = datetime(t.date.year, t.date.month, t.date.day)
+        if t.end_date is not None:
+            t.end_date = datetime(t.end_date.year, t.end_date.month, t.end_date.day)
         r_str = str(t.recurrence_rule)
         r_end = end_date if t.end_date is None else min(t.end_date, end_date)
         r = rrulestr(r_str, dtstart=t.date, forceset=True, ignoretz=True)
+        # if start_date.year == 2025 and start_date.month==11 and start_date.day == 26:
+        #     print (f'{t.date}, {r_str}, {r_end}, {len(r.between(start_date, r_end, inc=True))}')
         for dt in r.between(start_date, r_end, inc=True):
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=TZ_PT)
             transactions.append(
                 Transaction(
                     description = t.description,
                     amount = t.amount,
-                    date = dt,
+                    date = dt.replace(tzinfo=TZ_PT),
                     is_recurring = t.is_recurring,
                     recurrence_rule = t.recurrence_rule,
                     account = t.account,
-                    end_date = t.end_date
+                    end_date = t.end_date.replace(tzinfo=TZ_PT) if t.end_date is not None else None
                 )
             )
     return sorted(transactions, key = lambda t: t.date)
